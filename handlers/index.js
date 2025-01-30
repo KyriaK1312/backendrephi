@@ -94,14 +94,13 @@ export const userAuthentification = async (req, res) => {
         const user = await user_authentification(email, password);
         console.log(user);
         
-        if(!user){
-            console.log("Utilisateur non trouvé");
+        if(user.length === 0 ){
+            return res.status(403).json({message: "Utilisateur non trouvé !"})
             
         }
-        return res.status(201).json({ user } );
+        return res.status(201).json({ user });
      
-        
-         
+                
 
     } catch (error) {
         console.log(error);
