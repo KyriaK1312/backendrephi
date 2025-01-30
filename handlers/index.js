@@ -1,5 +1,8 @@
 import { create_user, createProvider, deleteUser, user_authentification } from "../database/queries.js";
+import jwt from "jsonwebtoken";
+import { config } from "dotenv";
 
+config();
 
 // Table providers 
 export const newProvider = async (req, res) => {
@@ -83,7 +86,7 @@ export const delete_User = async (req, res) => {
 export const userAuthentification = async (req, res) => {
     const {email, password} = req.body;
   
-    if(!email && !password){
+    if(!email || !password){
         return res
         .status(403)
         .json({message: "input parameters not provided"});
@@ -97,12 +100,32 @@ export const userAuthentification = async (req, res) => {
         if(user.length === 0 ){
             return res.status(403).json({message: "Utilisateur non trouvé !"})
             
-        }
-        return res.status(201).json({ user });
-     
+        } 
+        
+        //Generate Token 
+        if(user){
+            jwt.sign({email, password}, process.env.SECRET_KEY, {expiresIn: '24h'}, (error, token) => {
+                if (error) {console.log(error)}
+                console.log("token:" + token);
+                // return res.send(token)
                 
 
-    } catch (error) {
+                    // localStorage.setItem('token', token);
+                    return res.status(201).json({ user, token });
+                
+                
+            });
+        } else {
+            console.log("Error: Could not log in");
+            
+        }
+             
+            
+        } 
+          
+                
+
+     catch (error) {
         console.log(error);
         res.status(500).json({message: "Error occured"});
     }
