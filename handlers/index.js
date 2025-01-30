@@ -81,9 +81,8 @@ export const delete_User = async (req, res) => {
 //authentification user 
 
 export const userAuthentification = async (req, res) => {
-    const { email, password } = req.body;
-    console.log(req.body);  
-
+    const {email, password} = req.body;
+  
     if(!email && !password){
         return res
         .status(403)
@@ -92,15 +91,17 @@ export const userAuthentification = async (req, res) => {
 
     try {
         
-        const user = await user_authentification(email, password) ;
-        // return res.status(201).json({ user } );
-        console.log({user});
+        const user = await user_authentification(email, password);
+        console.log(user);
         
-        // if(!user){
-        //     console.log("not exist!");
+        if(!user){
+            console.log("Utilisateur non trouvé");
             
-        // }
+        }
+        return res.status(201).json({ user } );
+     
         
+         
 
     } catch (error) {
         console.log(error);

@@ -92,22 +92,22 @@ export const deleteUser = async (id) => {
 export const user_authentification = async (email, password) => {
 
     const QUERY = `SELECT * FROM users
-        WHERE  email = ?
-              AND password = ? 
-    `;
+                WHERE email = ?
+                        AND password = ?
+         `;
+   
+
     try {
         const client = await pool.getConnection();   
 
-        const result = await client.query(QUERY, [ email, password]);
-        console.log(result);
+        const result = await client.query(QUERY, [email, password]);
+      
+        // console.log(result);
+    
+            return result[0];
+        
 
-        if(!result){
-            return res
-            .status(403)
-            .json({message: "FORBIDEN"});
-        }
-                    
-        return result;
+        
             
         }
      catch (error) {
