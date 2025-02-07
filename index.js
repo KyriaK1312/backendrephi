@@ -3,11 +3,18 @@ import { connectToDatabase } from "./database/index.js";
 import appRouter from "./routes/index.js";
 import { config } from "dotenv";
 import cookieParser from "cookie-parser";
+import cors from 'cors';
+
 
 
 config();
 const app = express();
 app.use(cookieParser());
+
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+}));
 
 const PORT = 3001;
 

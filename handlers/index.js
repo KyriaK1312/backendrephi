@@ -1,6 +1,7 @@
 import { create_user, createProvider, deleteUser, user_authentification } from "../database/queries.js";
 import jwt from "jsonwebtoken";
 import { config } from "dotenv";
+import { parseCookies, setCookie } from "nookies";
 
 config();
 
@@ -85,6 +86,8 @@ export const delete_User = async (req, res) => {
 
 export const userAuthentification = async (req, res) => {
     const {email, password} = req.body;
+    // const cookies = parseCookies({req});
+    const id = req.params.id;
   
     if(!email || !password){
         return res
@@ -104,29 +107,61 @@ export const userAuthentification = async (req, res) => {
         
         //Generate Token 
         if(user){
-            jwt.sign({email, password}, process.env.SECRET_KEY, {expiresIn: '24h'}, (error, token) => {
-                if (error) {console.log(error)}
-                console.log("token:" + token);
-                // return res.send(token)
-                
-
-                    // localStorage.setItem('token', token);
-                    return res.status(201).json({ user, token });
-                
-                
+                        
+            const token = jwt.sign({id}, process.env.SECRET_KEY, {expiresIn: '24h'});
+            console.log(token);
+       
+    //     
+            res.cookie('token', token, {
+                httpOnly: false, // Empêche l'accès au cookie via JavaScript côté client
+                secure: false, // Utilisez 'secure' uniquement en production (HTTPS)
+                maxAge: 24 * 60 * 60 * 1000, // 24 heures
+                sameSite: 'lax', // Protection contre les attaques CSRF
+                domain:'localhost',
+                path: '/', // Le cookie est accessible sur tout le site
             });
-        } else {
+          
+
+            return res.status(201).json({ user, token})
+        } 
+        
+        else {
             console.log("Error: Could not log in");
             
-        }
-             
+        }                                       
             
-        } 
-          
-                
-
-     catch (error) {
+    }        
+            
+    catch (error) {
         console.log(error);
         res.status(500).json({message: "Error occured"});
     }
-};
+} ;
+    
+// export async function getServerSideProps(context) {
+
+// //   const { id } = context.query;
+// //    const token = await jwt.sign({id}, process.env.SECRET_KEY, {expiresIn: '24h'});
+
+//         setCookie(context, 'userToken', "heyho", {
+//             maxAge: 60*60*24,
+//             path: '/',
+//            });
+//         //    console.log(token);
+
+//         // const cookies = parseCookies(context);
+           
+//         return {
+            
+//             // props: { userToken: cookies.userToken || 'Pas de Token'}
+//             props: {},
+            
+            
+//         };
+    
+
+// }
+              
+        
+
+
