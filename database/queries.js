@@ -47,10 +47,10 @@ export const createProvider = async (name, label) => {
 
 
 // create a user 
-export const create_user = async (pseudo, password, providers, email) => {
+export const create_user = async (password, email, providers_id) => {
 
-    const QUERY = `INSERT  INTO users(pseudo, password, providers, email)
-    VALUES(?,?,?,?)
+    const QUERY = `INSERT  INTO users(password, email, providers_id)
+    VALUES(?,?,?)
     `;
 
     // Donc on insert dans la table providers un element avec le nom et le label. values sert à renseigner les valeurs de ces 2 éléments 
@@ -58,7 +58,7 @@ export const create_user = async (pseudo, password, providers, email) => {
     try {
         const client = await pool.getConnection();
 
-        const result = await client.query(QUERY, [pseudo, password, providers, email]);
+        const result = await client.query(QUERY, [ password, email, providers_id]);
         console.log(result);
         return result;
     } catch (error) {
@@ -118,5 +118,24 @@ export const user_authentification = async (email, password) => {
 };
 
 
+//gestion session 
+
+export const handleSession = async (user_id, token, expiration, token_status) => {
+
+    const QUERY = `INSERT  INTO session(user_id, token, expiration, token_status)
+    VALUES(?,?,?,?)`;
+   
+    try {
+        const client = await pool.getConnection();
+
+        const result = await client.query(QUERY, [ user_id, token, expiration, token_status]);
+        console.log(result);
+        return result;
+    } catch (error) {
+        console.log("Error occured while creating new record", error);
+        throw error;
+        
+    }
+};
 
 

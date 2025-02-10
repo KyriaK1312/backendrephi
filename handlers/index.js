@@ -1,7 +1,7 @@
-import { create_user, createProvider, deleteUser, user_authentification } from "../database/queries.js";
+import { create_user, createProvider, deleteUser, user_authentification, handleSession } from "../database/queries.js";
 import jwt from "jsonwebtoken";
 import { config } from "dotenv";
-import { parseCookies, setCookie } from "nookies";
+
 
 config();
 
@@ -46,9 +46,9 @@ export const newProvider = async (req, res) => {
 // Table users 
 
 export const newUser = async (req, res) => {
-    const { pseudo, password, providers, email } = req.body;
+    const { password, email, providers_id } = req.body;
     console.log(req.body);
-    if(!pseudo || !email){
+    if(!email){
         return res
         .status(403)
         .json({message: "input parameters not provided"});
@@ -56,7 +56,7 @@ export const newUser = async (req, res) => {
 
     try {
         
-        const user = await create_user(pseudo, password, providers, email) ;
+        const user = await create_user(password, email, providers_id) ;
         return res.status(201).json({ user } );
 
     } catch (error) {
@@ -87,7 +87,7 @@ export const delete_User = async (req, res) => {
 export const userAuthentification = async (req, res) => {
     const {email, password} = req.body;
     // const cookies = parseCookies({req});
-    const id = req.params.id;
+    // const id = req.params.id;
   
     if(!email || !password){
         return res
@@ -107,19 +107,53 @@ export const userAuthentification = async (req, res) => {
         
         //Generate Token 
         if(user){
-                        
+                     
+            // console.log(user[0].id);
+            const id = user[0].id;
+            
             const token = jwt.sign({id}, process.env.SECRET_KEY, {expiresIn: '24h'});
             console.log(token);
-       
-    //     
-            res.cookie('token', token, {
-                httpOnly: false, // Empêche l'accès au cookie via JavaScript côté client
-                secure: false, // Utilisez 'secure' uniquement en production (HTTPS)
-                maxAge: 24 * 60 * 60 * 1000, // 24 heures
-                sameSite: 'lax', // Protection contre les attaques CSRF
-                domain:'localhost',
-                path: '/', // Le cookie est accessible sur tout le site
-            });
+            
+            try {
+                               
+                const VerifiedToken = jwt.verify(token,process.env.SECRET_KEY);
+                
+                
+                if(VerifiedToken){
+                    console.log(VerifiedToken);
+                    // La date d'expiration est donnée en timestamp. Le timestamp fournit par jwt est en secondes il faudrait le convertir en millisecondes pour pouvoir le convertir avec date
+                    function handleExpirationDate(myDate){
+                        
+                        // conversion en millisecondes
+                        let expirationDate = new Date(myDate * 1000).toLocaleDateString("fr-FR", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "numeric",
+                            second: "numeric",
+                        }); 
+                            return expirationDate;
+                        }
+                    console.log(handleExpirationDate(VerifiedToken.exp));
+                    
+
+                
+                    
+
+                }
+            } 
+            catch (error) {
+                console.log("Token invalide ou expiré :", error.message);
+        }
+            // res.cookie('token', token, {
+            //     httpOnly: false, // Empêche l'accès au cookie via JavaScript côté client
+            //     secure: false, // Utilisez 'secure' uniquement en production (HTTPS)
+            //     maxAge: 24 * 60 * 60 * 1000, // 24 heures
+            //     sameSite: 'lax', // Protection contre les attaques CSRF
+            //     domain:'localhost',
+            //     path: '/', // Le cookie est accessible sur tout le site
+            // });
           
 
             return res.status(201).json({ user, token})
@@ -137,30 +171,30 @@ export const userAuthentification = async (req, res) => {
         res.status(500).json({message: "Error occured"});
     }
 } ;
+
+
+export const newSession = async (req, res) => {
+    const { user_id, token, expiration, token_status } = req.body;
+
+    if(!token || !user_id){
+        return res
+        .status(403)
+        .json({message: "input parameters not provided"});
+    }
+
+    try {
+        
+        const session = await handleSession(user_id, token, expiration, token_status) ;
+        return res.status(201).json({session});
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message: "Error occured"});
+    }
+};
+
     
-// export async function getServerSideProps(context) {
 
-// //   const { id } = context.query;
-// //    const token = await jwt.sign({id}, process.env.SECRET_KEY, {expiresIn: '24h'});
-
-//         setCookie(context, 'userToken', "heyho", {
-//             maxAge: 60*60*24,
-//             path: '/',
-//            });
-//         //    console.log(token);
-
-//         // const cookies = parseCookies(context);
-           
-//         return {
-            
-//             // props: { userToken: cookies.userToken || 'Pas de Token'}
-//             props: {},
-            
-            
-//         };
-    
-
-// }
               
         
 
