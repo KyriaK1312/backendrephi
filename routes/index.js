@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { delete_User,  newProvider, newSession, newUser, userAuthentification } from "../handlers/index.js";
+import { delete_User,  newProvider, newUser, userAuthentification } from "../handlers/index.js";
 
 
 const appRouter = Router();
@@ -12,7 +12,7 @@ appRouter.post("/auth/user", userAuthentification);
 
 appRouter.post("/create/user", newUser);
 
-appRouter.post("/create/session", newSession);
+// appRouter.post("/create/session", newSession);
 
 appRouter.delete("/delete/:id", delete_User);
 

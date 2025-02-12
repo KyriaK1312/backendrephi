@@ -120,15 +120,19 @@ export const user_authentification = async (email, password) => {
 
 //gestion session 
 
-export const handleSession = async (user_id, token, expiration, token_status) => {
+// export const handleSession = async (user_id, token, expiration, token_status) => {
+export const handleSession = async (user_id, expiration) => {
 
-    const QUERY = `INSERT  INTO session(user_id, token, expiration, token_status)
-    VALUES(?,?,?,?)`;
+    // const QUERY = `INSERT  INTO session(user_id, token, expiration, token_status)
+    // VALUES(?,?,?,?)`;
+    const QUERY = `INSERT  INTO session(user_id, expiration)
+    VALUES(?,?)`;
    
     try {
         const client = await pool.getConnection();
 
-        const result = await client.query(QUERY, [ user_id, token, expiration, token_status]);
+        // const result = await client.query(QUERY, [ user_id, token, expiration, token_status]);
+        const result = await client.query(QUERY, [ user_id, expiration]);
         console.log(result);
         return result;
     } catch (error) {
