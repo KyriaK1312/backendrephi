@@ -47,16 +47,19 @@ export const newProvider = async (req, res) => {
 
 export const newUser = async (req, res) => {
     const { password, email, providers_id } = req.body;
+    // const { password, email } = req.body;
     console.log(req.body);
-    if(!email){
+
+    if(!email || !password){
         return res
         .status(403)
         .json({message: "input parameters not provided"});
     }
 
     try {
-        
+                
         const user = await create_user(password, email, providers_id) ;
+        // const user = await create_user(password, email) ;
         return res.status(201).json({ user } );
 
     } catch (error) {
@@ -89,7 +92,7 @@ export const userAuthentification = async (req, res) => {
     // const cookies = parseCookies({req});
     // const id = req.params.id;
   
-    if(!email || !password){
+    if(!email){
         return res
         .status(403)
         .json({message: "input parameters not provided"});
@@ -102,7 +105,6 @@ export const userAuthentification = async (req, res) => {
         
         if(user.length === 0 ){
             return res.status(403).json({message: "Utilisateur non trouvé !"})
-            
         } 
         
         //Generate Token 
@@ -111,7 +113,7 @@ export const userAuthentification = async (req, res) => {
             // console.log(user[0].id);
             const id = user[0].id;
             
-            const token = jwt.sign({id}, process.env.SECRET_KEY, {expiresIn: '1s'});
+            const token = jwt.sign({id}, process.env.SECRET_KEY, {expiresIn: '24h'});
             console.log(token);
             
             try {
@@ -125,13 +127,14 @@ export const userAuthentification = async (req, res) => {
                     function handleExpirationDate(myDate){
                         
                         // conversion en millisecondes
-                        let expirationDate = new Date(myDate * 1000).toLocaleDateString("fr-FR", {
+                        let expirationDate = new Date(myDate * 1000).toLocaleDateString("en-US", {
                             year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "numeric",
-                            minute: "numeric",
-                            second: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: false
                         }); 
                             return expirationDate;
                         }
@@ -150,10 +153,7 @@ export const userAuthentification = async (req, res) => {
                     res.status(500).json({message: "Error occured"});
                     }
                 }
-                    // else {
-                    //     const token_status = "inactive";
-                    //     const session_2 = await handleSession(user_id, expiration, token, token_status); 
-                    // }
+                  
                                     
             } catch (error) {
                 console.log("Token invalide ou expiré :", error.message);

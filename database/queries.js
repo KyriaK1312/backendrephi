@@ -48,10 +48,14 @@ export const createProvider = async (name, label) => {
 
 // create a user 
 export const create_user = async (password, email, providers_id) => {
+// export const create_user = async (password, email) => {
 
     const QUERY = `INSERT  INTO users(password, email, providers_id)
     VALUES(?,?,?)
     `;
+    // const QUERY = `INSERT  INTO users(password, email)
+    // VALUES(?,?)
+    // `;
 
     // Donc on insert dans la table providers un element avec le nom et le label. values sert à renseigner les valeurs de ces 2 éléments 
 
@@ -59,6 +63,7 @@ export const create_user = async (password, email, providers_id) => {
         const client = await pool.getConnection();
 
         const result = await client.query(QUERY, [ password, email, providers_id]);
+        // const result = await client.query(QUERY, [ password, email]);
         console.log(result);
         return result;
     } catch (error) {
