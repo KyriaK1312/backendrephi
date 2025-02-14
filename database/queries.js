@@ -47,11 +47,11 @@ export const createProvider = async (name, label) => {
 
 
 // create a user 
-export const create_user = async (password, email, providers_id) => {
+export const create_user = async (name, email,password,providers_id) => {
 // export const create_user = async (password, email) => {
 
-    const QUERY = `INSERT  INTO users(password, email, providers_id)
-    VALUES(?,?,?)
+    const QUERY = `INSERT  INTO users(name, email, password, providers_id)
+    VALUES(?,?,?,?)
     `;
     // const QUERY = `INSERT  INTO users(password, email)
     // VALUES(?,?)
@@ -62,7 +62,7 @@ export const create_user = async (password, email, providers_id) => {
     try {
         const client = await pool.getConnection();
 
-        const result = await client.query(QUERY, [ password, email, providers_id]);
+        const result = await client.query(QUERY, [name, email, password, providers_id]);
         // const result = await client.query(QUERY, [ password, email]);
         console.log(result);
         return result;
@@ -94,18 +94,26 @@ export const deleteUser = async (id) => {
 
 //user authentification
 
+// export const user_authentification = async (email,password) => {
 export const user_authentification = async (email, password) => {
 
     const QUERY = `SELECT * FROM users
                 WHERE email = ?
-                        AND password = ?
+                    AND password = ?
+                   
          `;
+   
+    // const QUERY = `SELECT * FROM users
+    //             WHERE email = ?
+    //                     AND password = ?
+    //      `;
    
 
     try {
         const client = await pool.getConnection();   
 
         const result = await client.query(QUERY, [email, password]);
+        // const result = await client.query(QUERY, [email, password]);
       
         // console.log(result);
     

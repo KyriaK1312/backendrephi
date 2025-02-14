@@ -46,11 +46,11 @@ export const newProvider = async (req, res) => {
 // Table users 
 
 export const newUser = async (req, res) => {
-    const { password, email, providers_id } = req.body;
+    const { name, email, password, providers_id } = req.body;
     // const { password, email } = req.body;
     console.log(req.body);
 
-    if(!email || !password){
+    if(!email){
         return res
         .status(403)
         .json({message: "input parameters not provided"});
@@ -58,7 +58,7 @@ export const newUser = async (req, res) => {
 
     try {
                 
-        const user = await create_user(password, email, providers_id) ;
+        const user = await create_user( name, email, password, providers_id) ;
         // const user = await create_user(password, email) ;
         return res.status(201).json({ user } );
 
