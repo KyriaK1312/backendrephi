@@ -1,4 +1,4 @@
-import { create_user, createProvider, deleteUser, user_authentification, handleSession } from "../database/queries.js";
+import {createProvider, deleteUser, user_authentification, handleSession, searchProvider, createUser } from "../database/queries.js";
 import jwt from "jsonwebtoken";
 import { config } from "dotenv";
 
@@ -46,7 +46,8 @@ export const newProvider = async (req, res) => {
 // Table users 
 
 export const newUser = async (req, res) => {
-    const { name, email, password, providers_id } = req.body;
+    // const { name, email, password, provider_id } = req.body;
+    const { email, provider_id } = req.body;
     // const { password, email } = req.body;
     console.log(req.body);
 
@@ -58,7 +59,8 @@ export const newUser = async (req, res) => {
 
     try {
                 
-        const user = await create_user( name, email, password, providers_id) ;
+        const user = await createUser(email, provider_id) ;
+        // const user = await createUser( name, email, password, provider_id) ;
         // const user = await create_user(password, email) ;
         return res.status(201).json({ user } );
 
@@ -81,41 +83,72 @@ export const delete_User = async (req, res) => {
         console.log(error);
         res.status(500).json({message: "Error occured"});
     }
-
     
 };
 
 //authentification user 
 
 export const userAuthentification = async (req, res) => {
-    const {email, password} = req.body;
-    // const cookies = parseCookies({req});
-    // const id = req.params.id;
+
+    // const {email, password, provider} = req.body;
+    const {email, provider} = req.body;
+    console.log("email:",email);
+    
+    console.log("provider:", provider);
+    
   
     if(!email){
         return res
         .status(403)
         .json({message: "input parameters not provided"});
     }
-
+    
+    
+    
     try {
+    
+        const provider_id = await searchProvider(provider);
+        console.log("provider_id:", provider_id);
         
-        const user = await user_authentification(email, password);
-        console.log(user);
+        if (!provider_id) {
+            return res.status(404).json({ message: "Fournisseur introuvable !" });
+        }
+
+       let user = await user_authentification(email, provider_id[0].id);
+        console.log(provider_id);
         
-        if(user.length === 0 ){
-            return res.status(403).json({message: "Utilisateur non trouvé !"})
+        console.log("user trouvé:", user);
+        
+        if(!user || user.length === 0 ){
+            try {
+                // console.log("Error: Could not log in");
+                 user = await createUser(email, provider_id[0].id)              
+                console.log("nouvel utilisateur:", user);
+              
+                if (!user) {
+                    return res.status(500).json({ message: "User creation failed!" });
+                }
+
+                return res.status(201).json({user})
+            } catch (error) {
+                console.log(error);
+                
+            }
         } 
-        
+             
         //Generate Token 
-        if(user){
-                     
-            // console.log(user[0].id);
-            const id = user[0].id;
+        // if(user){ 
+      
+           const id = user[0].id;
+           console.log("id de l'utilisateur:", id);
+           
             
-            const token = jwt.sign({id}, process.env.SECRET_KEY, {expiresIn: '24h'});
-            console.log(token);
-            
+        //    const providerFound = await searchProvider(provider);
+                       
+           const token = jwt.sign({id}, process.env.SECRET_KEY, {expiresIn: '24h'});
+           console.log("token généré:", token);
+           
+
             try {
                                
                 const VerifiedToken = jwt.verify(token,process.env.SECRET_KEY); // verification si le token est toujours valide ou pas. si oui(date expiration ok) alors pas d'erreur si non une erreur va être renvoyée
@@ -138,13 +171,13 @@ export const userAuthentification = async (req, res) => {
                         }); 
                             return expirationDate;
                         }
-                    console.log(handleExpirationDate(VerifiedToken.exp));
+                  console.log(handleExpirationDate(VerifiedToken.exp));
 
-                  const user_id = VerifiedToken.id ;
+                  const user_id = VerifiedToken.id;
                   const expiration = handleExpirationDate(VerifiedToken.exp); 
                   const token_status = "active";
 
-                    try {
+                try {
         
                     const session = await handleSession(user_id, expiration, token, token_status); 
             
@@ -159,14 +192,10 @@ export const userAuthentification = async (req, res) => {
                 console.log("Token invalide ou expiré :", error.message);
             }
             return res.status(201).json({ user, token})
-    } 
         
-        else {
-            console.log("Error: Could not log in");
+    }                                    
             
-        }                                       
-            
-    }        
+           
             
     catch (error) {
         console.log(error);

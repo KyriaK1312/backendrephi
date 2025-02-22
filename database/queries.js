@@ -47,11 +47,11 @@ export const createProvider = async (name, label) => {
 
 
 // create a user 
-export const create_user = async (name, email,password,providers_id) => {
+export const createUser = async (email, provider_id) => {
 // export const create_user = async (password, email) => {
 
-    const QUERY = `INSERT  INTO users(name, email, password, providers_id)
-    VALUES(?,?,?,?)
+    const QUERY = `INSERT  INTO users(email, provider_id)
+    VALUES(?,?)
     `;
     // const QUERY = `INSERT  INTO users(password, email)
     // VALUES(?,?)
@@ -62,7 +62,7 @@ export const create_user = async (name, email,password,providers_id) => {
     try {
         const client = await pool.getConnection();
 
-        const result = await client.query(QUERY, [name, email, password, providers_id]);
+        const result = await client.query(QUERY, [email, provider_id]);
         // const result = await client.query(QUERY, [ password, email]);
         console.log(result);
         return result;
@@ -95,24 +95,33 @@ export const deleteUser = async (id) => {
 //user authentification
 
 // export const user_authentification = async (email,password) => {
-export const user_authentification = async (email, password) => {
+export const user_authentification = async (email,provider_id) => {
 
-    const QUERY = `SELECT * FROM users
-                WHERE email = ?
-                    AND password = ?
-                   
-         `;
-   
-    // const QUERY = `SELECT * FROM users
+    // const QUERY = `SELECT 
+    //                 u.id as user_id,
+    //                 u.name as user_name,
+    //                 u.email as email,
+    //                 u.provider_id as user_provider_id,
+    //                 p.id as provider_id,
+    //                 p.name as provider_name
+    //             FROM users u
+    //             INNER JOIN providers p ON u.provider_id=p.id 
+                    
     //             WHERE email = ?
-    //                     AND password = ?
-    //      `;
+    //             AND provider=?
+                
+    //             `;
+                
    
+    const QUERY = `SELECT * FROM users
+                WHERE email = ? AND provider_id = ?
+    `;
+    
 
     try {
         const client = await pool.getConnection();   
 
-        const result = await client.query(QUERY, [email, password]);
+        const result = await client.query(QUERY, [email, provider_id]);
         // const result = await client.query(QUERY, [email, password]);
       
         // console.log(result);
@@ -152,3 +161,26 @@ export const handleSession = async (user_id, expiration, token, token_status) =>
 };
 
 
+export const searchProvider = async (provider) => {
+  
+    const QUERY = `SELECT id FROM providers
+                WHERE provider = ?        
+         `;
+   
+         try {
+            const client = await pool.getConnection();   
+    
+            const result = await client.query(QUERY, [provider]);
+      
+                return result[0];
+               
+            
+                
+            }
+         catch (error) {
+            console.log("Error occured while creating new record", error);
+            throw error;
+            
+        }
+    
+};
