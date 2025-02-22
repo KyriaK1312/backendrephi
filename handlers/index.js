@@ -91,10 +91,14 @@ export const delete_User = async (req, res) => {
 export const userAuthentification = async (req, res) => {
 
     // const {email, password, provider} = req.body;
-    const {name, email, provider} = req.body;
+    const {name, email, password,provider} = req.body;
     console.log("email:",email);
     console.log("name:", name);
+    console.log("password:", password);
+    
     console.log("provider:", provider);
+    // console.log("password", password);
+    
     
   
     if(!email){
@@ -118,11 +122,17 @@ export const userAuthentification = async (req, res) => {
         console.log(provider_id);
         
         console.log("user trouvé:", user);
+
+
+    // if(!user && password){
+    //     console.log("Utilisateur non trouvé, Veuillez créer un compte");
+        
+    // }
         
         if(!user || user.length === 0 ){
             try {
                 // console.log("Error: Could not log in");
-                 user = await createUser(name, email, provider_id[0].id)              
+                 user = await createUser(name, email,password, provider_id[0].id)              
                 console.log("nouvel utilisateur:", user[0].insertId);
                 
                         

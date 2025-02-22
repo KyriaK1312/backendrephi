@@ -47,11 +47,11 @@ export const createProvider = async (name, label) => {
 
 
 // create a user 
-export const createUser = async (name, email, provider_id) => {
+export const createUser = async (name, email,password, provider_id) => {
 // export const create_user = async (password, email) => {
 
-    const QUERY = `INSERT  INTO users(name, email, provider_id)
-    VALUES(?,?,?)
+    const QUERY = `INSERT  INTO users(name, email,password, provider_id)
+    VALUES(?,?,?,?)
     `;
     // const QUERY = `INSERT  INTO users(password, email)
     // VALUES(?,?)
@@ -62,7 +62,7 @@ export const createUser = async (name, email, provider_id) => {
     try {
         const client = await pool.getConnection();
 
-        const result = await client.query(QUERY, [name,email, provider_id]);
+        const result = await client.query(QUERY, [name,email,password, provider_id]);
         // const result = await client.query(QUERY, [ password, email]);
         console.log(result);
         return result;
