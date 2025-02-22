@@ -123,13 +123,14 @@ export const userAuthentification = async (req, res) => {
             try {
                 // console.log("Error: Could not log in");
                  user = await createUser(email, provider_id[0].id)              
-                console.log("nouvel utilisateur:", user);
-              
+                console.log("nouvel utilisateur:", user[0].insertId);
+                
+                        
                 if (!user) {
                     return res.status(500).json({ message: "User creation failed!" });
                 }
 
-                return res.status(201).json({user})
+                // return res.status(201).json({user})
             } catch (error) {
                 console.log(error);
                 
@@ -139,7 +140,7 @@ export const userAuthentification = async (req, res) => {
         //Generate Token 
         // if(user){ 
       
-           const id = user[0].id;
+           const id = user[0].id || user[0].insertId;
            console.log("id de l'utilisateur:", id);
            
             
