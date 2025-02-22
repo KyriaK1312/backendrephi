@@ -91,9 +91,9 @@ export const delete_User = async (req, res) => {
 export const userAuthentification = async (req, res) => {
 
     // const {email, password, provider} = req.body;
-    const {email, provider} = req.body;
+    const {name, email, provider} = req.body;
     console.log("email:",email);
-    
+    console.log("name:", name);
     console.log("provider:", provider);
     
   
@@ -122,7 +122,7 @@ export const userAuthentification = async (req, res) => {
         if(!user || user.length === 0 ){
             try {
                 // console.log("Error: Could not log in");
-                 user = await createUser(email, provider_id[0].id)              
+                 user = await createUser(name, email, provider_id[0].id)              
                 console.log("nouvel utilisateur:", user[0].insertId);
                 
                         
