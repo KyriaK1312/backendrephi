@@ -130,6 +130,7 @@ export const userAuthentification = async (req, res) => {
     // }
         
         if(!user || user.length === 0 ){
+
             try {
                 // console.log("Error: Could not log in");
                  user = await createUser(name, email,password, provider_id[0].id)              
